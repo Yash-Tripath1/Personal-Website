@@ -35,9 +35,7 @@ function pathAt(p: number, aspect: number) {
 export function CameraRig() {
   const size = useThree((s) => s.size);
 
-  useFrame((s, dtRaw) => {
-    // a long frame (tab switch, slow phone) should not make the camera lurch
-    const dt = Math.min(dtRaw, 0.05);
+  useFrame((s, dt) => {
     const cam = s.camera as THREE.PerspectiveCamera;
     const aspect = size.width / size.height;
 
@@ -91,11 +89,9 @@ export function CameraRig() {
     }
     z += (1 - intro) * 40;
 
-    // soft mouse parallax (off on touch screens, where the pointer is just the last tap)
-    const px = state.isTouch ? 0 : s.pointer.x;
-    const py = state.isTouch ? 0 : s.pointer.y;
-    mx += (px - mx) * Math.min(1, dt * 3);
-    my += (py - my) * Math.min(1, dt * 3);
+    // soft mouse parallax
+    mx += (s.pointer.x - mx) * Math.min(1, dt * 3);
+    my += (s.pointer.y - my) * Math.min(1, dt * 3);
 
     cam.position.set(x + mx * 0.55, y + my * 0.35, z);
     cam.lookAt(x + mx * 1.3, y + my * 0.8, z - 20);

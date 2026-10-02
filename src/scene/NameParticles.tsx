@@ -64,8 +64,7 @@ function build(step: number) {
     const seg = Math.min(2.999, k * 3);
     const i0 = Math.floor(seg);
     tmp.copy(GRADIENT[i0]).lerp(GRADIENT[i0 + 1], seg - i0);
-    // a touch brighter than before so the name reads clearly against the dark sky
-    const v = 0.72 + Math.random() * 0.22;
+    const v = 0.55 + Math.random() * 0.2;
     col[i * 3] = tmp.r * v;
     col[i * 3 + 1] = tmp.g * v;
     col[i * 3 + 2] = tmp.b * v;
@@ -96,8 +95,7 @@ export function NameParticles({ mobile }: { mobile: boolean }) {
     };
   }, []);
 
-  // a coarser grid on phones keeps the per-frame particle maths cheap
-  const data = useMemo(() => (ready ? build(mobile ? 7 : 4) : null), [ready, mobile]);
+  const data = useMemo(() => (ready ? build(mobile ? 6 : 4) : null), [ready, mobile]);
 
   useEffect(() => {
     if (!data || !geo.current) return;
@@ -125,7 +123,7 @@ export function NameParticles({ mobile }: { mobile: boolean }) {
     // mouse in the local space of the particle plane
     let mx = 1e5;
     let my = 1e5;
-    if (moved.current && appear > 0.9 && !state.isTouch) {
+    if (moved.current && appear > 0.9) {
       s.raycaster.setFromCamera(s.pointer, s.camera);
       if (s.raycaster.ray.intersectPlane(plane, hit)) {
         mx = (hit.x - g.position.x) / sc;
@@ -184,7 +182,7 @@ export function NameParticles({ mobile }: { mobile: boolean }) {
       <points frustumCulled={false}>
         <bufferGeometry ref={geo} />
         <pointsMaterial
-          size={mobile ? 0.11 : 0.09}
+          size={0.085}
           sizeAttenuation
           vertexColors
           map={dotTexture()}

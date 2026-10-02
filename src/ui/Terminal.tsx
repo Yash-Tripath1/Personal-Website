@@ -1,18 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { EDUCATION, LINKS, PROJECTS } from "../data/projects";
-import { CONTACT, HOME, scrollToStop } from "../lib/state";
+import { LINKS, PROJECTS } from "../data/projects";
 import { emit } from "../lib/bus";
+import { HOME, scrollToStop } from "../lib/state";
 
 type Line = { kind: "in" | "out"; text: string; href?: string };
 
-const out = (...text: string[]): Line[] => text.map((t) => ({ kind: "out" as const, text: t }));
+const out = (...t: string[]): Line[] => t.map((text) => ({ kind: "out", text }));
 
-const SUGGESTIONS = ["help", "projects", "skills", "education", "astro", "contact", "music next"];
+const SUGGESTIONS = ["help", "projects", "contact", "music", "fly home"];
 
 export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
-  const [lines, setLines] = useState<Line[]>(() =>
-    out("Welcome aboard. Type help, or tap a command below ↓"),
-  );
+  const [lines, setLines] = useState<Line[]>(() => out("Welcome. Type help to see what you can ask."));
   const [value, setValue] = useState("");
   const [hist, setHist] = useState<string[]>([]);
   const [hi, setHi] = useState(-1);
@@ -31,7 +29,7 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
         return out(
           "about · whoami · projects · skills · interests · education",
           "contact · email · github · linkedin · glymph",
-          "fly <planet> · music [name] · astro · dino · meteor · clear",
+          "fly <planet> · music [name] · dino · meteor · clear",
         );
       case "about":
         return out(
@@ -61,7 +59,10 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
       case "interests":
         return out("🛡 cybersecurity   🦖 dinosaurs   🎵 music   🧠 AI and ML   🛠 building products");
       case "education":
-        return out(...EDUCATION.map((e) => `${e.name} · ${e.detail} (${e.when})`));
+        return out(
+          "IIT Madras · BS Data Science and Applications (online, ongoing)",
+          "University of Lucknow · BCA (from Aug 2026)",
+        );
       case "contact":
         return [
           ...out("Let's talk:"),
@@ -73,7 +74,10 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
       case "email":
         return [{ kind: "out", text: LINKS.email, href: `mailto:${LINKS.email}` }];
       case "github":
-        return [{ kind: "out", text: "GitHub profile ↗", href: LINKS.github }, ...out(LINKS.githubNote)];
+        return [
+          { kind: "out", text: "GitHub profile ↗", href: LINKS.github },
+          ...out(LINKS.githubNote),
+        ];
       case "linkedin":
         return [{ kind: "out", text: "LinkedIn profile ↗", href: LINKS.linkedin }];
       case "glymph":
@@ -87,10 +91,6 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
           scrollToStop(HOME);
           return out("Flying to the home planet 🌍");
         }
-        if (["contact", "end", "astronaut", "astro"].includes(arg)) {
-          scrollToStop(CONTACT);
-          return out("Flying to the astronaut 🧑‍🚀");
-        }
         if (["top", "start", "hello"].includes(arg)) {
           scrollToStop(0);
           return out("Heading back to the start ↑");
@@ -103,13 +103,6 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
       }
       case "music":
         return out(...onMusic(arg).split("\n"));
-      case "astro":
-      case "astronaut":
-      case "wave":
-      case "hi":
-      case "hello":
-        emit("astro-wave");
-        return out("📡 Incoming transmission: the astronaut waves back. Hello, human!");
       case "dino":
         return out("RAWR. The little dino lives on the home planet, go say hi.");
       case "meteor":
@@ -133,84 +126,78 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
     setLines((l) => [...l, { kind: "in", text: cmd }, ...res]);
   };
 
-  const onKey = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const n = Math.min(hist.length - 1, hi + 1);
-      if (n >= 0) {
-        setHi(n);
-        setValue(hist[n]);
-      }
-    } else if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const n = hi - 1;
-      setHi(n);
-      setValue(n >= 0 ? hist[n] : "");
-    }
-  };
-
   return (
     <div
       className="card glass-solid w-full overflow-hidden rounded-[22px] md:max-w-[640px]"
       onClick={() => input.current?.focus({ preventScroll: true })}
     >
-      <div className="flex items-center gap-1.5 border-b border-white/15 px-4 py-2.5">
+      <div className="flex items-center gap-2 border-b border-white/10 bg-black/20 px-4 py-2.5">
         <span className="h-3 w-3 rounded-full bg-[#ff9fb8]" />
         <span className="h-3 w-3 rounded-full bg-[#ffe29a]" />
         <span className="h-3 w-3 rounded-full bg-[#9fe6bd]" />
-        <span className="ml-3 font-mono text-[12px] text-cream/85">anadi@cosmos: ~</span>
+        <span className="ml-3 font-mono text-[11px] text-cream/60">anadi@cosmos: ~</span>
       </div>
 
       <div
         ref={box}
-        className="term-scroll h-[22dvh] min-h-[120px] max-h-[200px] overflow-y-auto px-4 py-3 font-mono text-[12.5px] leading-relaxed text-cream md:h-[250px] md:max-h-none md:text-[13px]"
+        className="term-scroll h-[190px] overflow-y-auto px-4 py-3 font-mono text-[12.5px] leading-relaxed text-cream md:h-[250px] md:text-[13px]"
       >
         {lines.map((l, i) => (
-          <div key={i} className="break-words">
+          <div key={i} className={l.kind === "in" ? "text-cream" : "text-cream/90"}>
             {l.kind === "in" && <span className="mr-2 text-blush">❯</span>}
             {l.href ? (
               <a
                 href={l.href}
                 target="_blank"
                 rel="noreferrer"
-                className="whitespace-pre-wrap underline decoration-blush/70 underline-offset-4 hover:text-blush"
+                className="whitespace-pre-wrap underline decoration-blush/60 underline-offset-4 hover:text-blush"
               >
                 {l.text}
               </a>
             ) : (
-              <span className={`whitespace-pre-wrap ${l.kind === "in" ? "text-cream" : "text-cream/95"}`}>{l.text}</span>
+              <span className="whitespace-pre-wrap">{l.text}</span>
             )}
           </div>
         ))}
       </div>
 
       <form
-        className="flex items-center gap-2 border-t border-white/15 px-4 py-2"
         onSubmit={(e) => {
           e.preventDefault();
           submit(value);
           setValue("");
         }}
+        className="flex items-center gap-2 border-t border-white/10 px-4 py-2.5 font-mono text-[13px]"
       >
-        <span className="font-mono text-blush">❯</span>
-        {/* 16px on phones: anything smaller makes iOS zoom the page when the field is focused */}
+        <span className="text-blush">❯</span>
         <input
           ref={input}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={onKey}
-          placeholder="type help…"
-          autoCapitalize="off"
-          autoCorrect="off"
-          autoComplete="off"
+          onKeyDown={(e) => {
+            if (e.key === "ArrowUp") {
+              e.preventDefault();
+              const n = Math.min(hist.length - 1, hi + 1);
+              if (n >= 0) {
+                setHi(n);
+                setValue(hist[n]);
+              }
+            } else if (e.key === "ArrowDown") {
+              e.preventDefault();
+              const n = hi - 1;
+              setHi(n);
+              setValue(n >= 0 ? hist[n] : "");
+            }
+          }}
+          placeholder="type a command"
           spellCheck={false}
-          enterKeyHint="send"
-          aria-label="Terminal command"
-          className="min-w-0 flex-1 bg-transparent py-1.5 font-mono text-[16px] text-cream outline-none placeholder:text-cream/55 md:text-[13px]"
+          autoComplete="off"
+          autoCapitalize="off"
+          className="min-w-0 flex-1 bg-transparent text-cream outline-none placeholder:text-cream/30"
         />
       </form>
 
-      <div className="term-scroll flex gap-1.5 overflow-x-auto border-t border-white/10 px-3 py-2">
+      <div className="flex flex-wrap gap-1.5 px-4 pb-3">
         {SUGGESTIONS.map((c) => (
           <button
             key={c}
@@ -219,7 +206,7 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
               e.stopPropagation();
               submit(c);
             }}
-            className="shrink-0 rounded-full border border-cream/35 px-3 py-1.5 font-mono text-[11.5px] text-cream transition hover:border-blush hover:text-blush active:scale-95"
+            className="rounded-full border border-white/20 px-2.5 py-1 font-mono text-[11px] text-cream/75 transition hover:bg-white/10 hover:text-cream"
           >
             {c}
           </button>

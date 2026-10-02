@@ -141,12 +141,3 @@ export const LINKS = {
   linkedin: "https://linkedin.com/in/anadi-tripathi-4a33543a6",
   glymph: "https://github.com/glymph-studio",
 };
-
-export type Milestone = { name: string; detail: string; when: string };
-
-export const EDUCATION: Milestone[] = [
-  { name: "IIT Madras", detail: "BS Data Science and Applications, online", when: "ongoing" },
-  { name: "University of Lucknow", detail: "BCA", when: "from Aug 2026" },
-  { name: "Glymph Studio", detail: "Cofounder", when: "from 2026" },
-  { name: "City Montessori School", detail: "Mahanagar, Lucknow", when: "2022–2026" },
-];

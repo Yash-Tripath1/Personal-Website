@@ -312,23 +312,22 @@ export function isMuted() {
 }
 
 // ---- tiny sfx --------------------------------------------------------------
-export function sfx(kind: "click" | "flash" | "ping" | "arrive" | "roar" | "wave", idx = 0) {
+export function sfx(kind: "click" | "flash" | "ping" | "arrive" | "roar", idx = 0) {
   if (muted || !ctx || !master) return;
   const c = ctx;
   const t = c.currentTime;
-  const tone = (type: OscillatorType, f0: number, f1: number, dur: number, vol: number, delay = 0) => {
+  const tone = (type: OscillatorType, f0: number, f1: number, dur: number, vol: number) => {
     const o = c.createOscillator();
     o.type = type;
-    o.frequency.setValueAtTime(f0, t + delay);
-    o.frequency.exponentialRampToValueAtTime(f1, t + delay + dur);
+    o.frequency.setValueAtTime(f0, t);
+    o.frequency.exponentialRampToValueAtTime(f1, t + dur);
     const g = c.createGain();
-    g.gain.setValueAtTime(0.0001, t + delay);
-    g.gain.linearRampToValueAtTime(vol, t + delay + 0.01);
-    g.gain.exponentialRampToValueAtTime(0.0001, t + delay + dur);
+    g.gain.setValueAtTime(vol, t);
+    g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
     o.connect(g);
     g.connect(master!);
-    o.start(t + delay);
-    o.stop(t + delay + dur + 0.05);
+    o.start(t);
+    o.stop(t + dur + 0.05);
   };
   switch (kind) {
     case "click":
@@ -343,12 +342,6 @@ export function sfx(kind: "click" | "flash" | "ping" | "arrive" | "roar" | "wave
       break;
     case "roar":
       tone("sawtooth", 180, 50, 0.7, 0.07);
-      break;
-    case "wave":
-      // a friendly radio blip: three rising beeps
-      tone("sine", 520, 540, 0.16, 0.07, 0);
-      tone("sine", 700, 720, 0.16, 0.07, 0.14);
-      tone("sine", 940, 960, 0.3, 0.07, 0.28);
       break;
     case "arrive": {
       const m = DRIFT_SC[idx % DRIFT_SC.length];

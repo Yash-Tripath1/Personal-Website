@@ -21,20 +21,15 @@ export function Toasts() {
     [],
   );
 
-  // long lines wrap instead of running off a narrow phone screen
-  const maxW = Math.min(340, window.innerWidth - 32);
-  const half = maxW / 2;
-
   return (
     <div className="pointer-events-none fixed inset-0 z-[60] overflow-hidden">
       {items.map((t) => (
         <div
           key={t.id}
-          className="absolute w-max rounded-2xl border border-white/30 bg-[#1c1636]/95 px-4 py-2.5 text-center font-display text-[15px] italic leading-snug text-cream shadow-[0_10px_40px_-10px_rgba(0,0,0,0.7)] md:text-[16px]"
+          className="absolute whitespace-nowrap rounded-full border border-white/25 bg-[#241b46]/80 px-4 py-2 font-display text-[15px] italic text-cream shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-md"
           style={{
-            maxWidth: maxW,
-            left: Math.min(Math.max(t.x, half + 16), window.innerWidth - half - 16),
-            top: Math.max(70, t.y),
+            left: Math.min(Math.max(t.x, 120), window.innerWidth - 120),
+            top: t.y,
             animation: `floatUp ${TOAST_MS}ms cubic-bezier(.2,.7,.2,1) forwards`,
           }}
         >
