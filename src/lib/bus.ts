@@ -1,11 +1,11 @@
 // Tiny event bus so the 3D scene and the DOM overlay can talk to each other.
 export type ToastDetail = { text: string; x: number; y: number };
 
-export function emit<T = unknown>(name: string, detail?: T) {
-  window.dispatchEvent(new CustomEvent(name, { detail }));
+export function emit<T = void>(name: string, detail?: T) {
+  window.dispatchEvent(new CustomEvent<T | undefined>(name, { detail }));
 }
 
-export function on<T = unknown>(name: string, cb: (detail: T) => void) {
+export function on<T = void>(name: string, cb: (detail: T) => void) {
   const handler = (e: Event) => cb((e as CustomEvent<T>).detail);
   window.addEventListener(name, handler);
   return () => window.removeEventListener(name, handler);

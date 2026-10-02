@@ -107,6 +107,27 @@ export function dotTexture() {
   return dot;
 }
 
+// A tiny "screen" for the astronaut's laptop: lines of mint code scrolling by.
+let code: THREE.CanvasTexture | null = null;
+export function codeTexture() {
+  if (code) return code;
+  const c = document.createElement("canvas");
+  c.width = 256;
+  c.height = 160;
+  const g = c.getContext("2d")!;
+  g.fillStyle = "#1c1636";
+  g.fillRect(0, 0, 256, 160);
+  const cols = ["#b6f0d2", "#ffc2d9", "#cdb8ff", "#b5dcff"];
+  for (let i = 0; i < 9; i++) {
+    g.fillStyle = cols[i % cols.length];
+    const indent = (i * 3) % 4;
+    g.fillRect(16 + indent * 16, 14 + i * 15, 40 + ((i * 53) % 120), 6);
+  }
+  code = new THREE.CanvasTexture(c);
+  code.colorSpace = THREE.SRGBColorSpace;
+  return code;
+}
+
 export function hashWord(word: string) {
   // cyrb53: small, fast, deterministic hash
   let h1 = 0xdeadbeef,

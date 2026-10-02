@@ -3,7 +3,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import * as THREE from "three";
 import type { Project } from "../data/projects";
 import { PLANET_R, stopPos } from "../lib/layout";
-import { state } from "../lib/state";
+import { IS_MOBILE, state } from "../lib/state";
 import { emit, setCursorLabel, toast } from "../lib/bus";
 import { sfx } from "../lib/audio";
 import { atmoFragment, atmoVertex, planetFragment, planetVertex } from "./shaders";
@@ -25,6 +25,10 @@ dummyTex.needsUpdate = true;
 
 // a planet ignores further clicks for this long after one registers
 const CLICK_COOLDOWN_MS = 3000;
+
+// phones get a lighter sphere; at that size nobody can tell
+const SEG = IS_MOBILE ? 56 : 96;
+const SEG_ATMO = IS_MOBILE ? 32 : 48;
 
 const rand = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
@@ -176,12 +180,12 @@ export function Planet({ index, project }: { index: number; project: Project }) 
         }}
         onClick={onClick}
       >
-        <sphereGeometry args={[PLANET_R, 96, 96]} />
+        <sphereGeometry args={[PLANET_R, SEG, SEG]} />
         <shaderMaterial vertexShader={planetVertex} fragmentShader={planetFragment} uniforms={uniforms} />
       </mesh>
 
       <mesh scale={1.2}>
-        <sphereGeometry args={[PLANET_R, 48, 48]} />
+        <sphereGeometry args={[PLANET_R, SEG_ATMO, SEG_ATMO]} />
         <shaderMaterial
           vertexShader={atmoVertex}
           fragmentShader={atmoFragment}

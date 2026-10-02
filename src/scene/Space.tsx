@@ -61,7 +61,11 @@ export function Nebula({ count = 18 }: { count?: number }) {
       Array.from({ length: count }, (_, i) => {
         const side = i % 2 === 0 ? 1 : -1;
         return {
-          pos: [side * (16 + Math.random() * 30), (Math.random() - 0.5) * 36, 10 - i * 15.5 - Math.random() * 6] as [number, number, number],
+          pos: [side * (16 + Math.random() * 30), (Math.random() - 0.5) * 36, 10 - i * (15.5 * (18 / count)) - Math.random() * 6] as [
+            number,
+            number,
+            number,
+          ],
           scale: 34 + Math.random() * 40,
           color: NEBULA[i % NEBULA.length],
           opacity: 0.14 + Math.random() * 0.14,

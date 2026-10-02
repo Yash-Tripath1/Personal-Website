@@ -33,8 +33,19 @@ export function cameraStop(i: number, aspect: number): [number, number, number] 
   const H = visibleHeight(D);
   const W = H * aspect;
   const portrait = aspect < 1;
-  // the contact object sits further out to the left so the terminal stays clear
-  const dx = portrait ? 0 : W * (i === CONTACT ? 0.33 : 0.25);
-  const shiftY = portrait ? H * (i === CONTACT ? 0.3 : 0.2) : 0;
+  // The contact scene is centred in the free space left of the terminal card, so
+  // nothing is clipped at the screen edge and nothing hides behind the card.
+  let dx = 0;
+  if (!portrait) {
+    if (i === CONTACT && typeof window !== "undefined") {
+      const w = window.innerWidth;
+      const cardLeft = Math.max(0.2, 0.95 - Math.min(640, w * 0.9) / w);
+      dx = W * (0.5 - cardLeft / 2);
+    } else {
+      dx = W * 0.25;
+    }
+  }
+  // on phones the card covers the lower half, so the planet is lifted into the top half
+  const shiftY = portrait ? H * (i === CONTACT ? 0.3 : 0.22) : 0;
   return [px - sideOf(i) * dx, py - shiftY, pz + D];
 }

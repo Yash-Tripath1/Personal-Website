@@ -5,7 +5,7 @@ import { Hud } from "./ui/Hud";
 import { Preloader } from "./ui/Preloader";
 import { Cursor } from "./ui/Cursor";
 import { Flash, Toasts } from "./ui/Effects";
-import { STOP_COUNT, STOP_VH, cancelFlight, isMobileViewport, state } from "./lib/state";
+import { IS_MOBILE, STOP_COUNT, STOP_VH, cancelFlight, progressFromScroll, state } from "./lib/state";
 import { emit, toast } from "./lib/bus";
 import { TRACKS, getTrack, isMuted, setTrack, sfx, startMusic, stopMusic, type TrackId } from "./lib/audio";
 
@@ -13,7 +13,7 @@ const KONAMI = ["ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown", "ArrowLeft", "Ar
 const FLIGHT_BREAK_KEYS = ["ArrowDown", "ArrowUp", "PageDown", "PageUp", " ", "Home", "End"];
 
 export default function App() {
-  const mobile = useMemo(() => isMobileViewport() || window.matchMedia("(pointer: coarse)").matches, []);
+  const mobile = useMemo(() => IS_MOBILE, []);
   const [showPre, setShowPre] = useState(true);
   const [leaving, setLeaving] = useState(false);
   const [entered, setEntered] = useState(false);
@@ -29,20 +29,23 @@ export default function App() {
     document.body.classList.add("locked");
     const onScroll = () => {
       if (state.flight) return; // a guided flight owns the camera
-      const p = window.scrollY / (window.innerHeight * STOP_VH);
-      state.target = Math.min(STOP_COUNT - 1, Math.max(0, p));
+      state.target = progressFromScroll();
     };
     const onKey = (e: KeyboardEvent) => {
+      // don't treat typing in the terminal as navigation
+      if ((e.target as HTMLElement | null)?.tagName === "INPUT") return;
       if (FLIGHT_BREAK_KEYS.includes(e.key)) cancelFlight();
     };
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", onScroll);
+    window.addEventListener("orientationchange", onScroll);
     window.addEventListener("wheel", cancelFlight, { passive: true });
     window.addEventListener("touchstart", cancelFlight, { passive: true });
     window.addEventListener("keydown", onKey);
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      window.removeEventListener("orientationchange", onScroll);
       window.removeEventListener("wheel", cancelFlight);
       window.removeEventListener("touchstart", cancelFlight);
       window.removeEventListener("keydown", onKey);

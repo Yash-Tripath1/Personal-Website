@@ -14,17 +14,30 @@ export const state = {
   enterTime: 0,
   meteorAt: -100,
   word: "anadi",
-  isTouch: false,
+  isTouch: typeof window !== "undefined" && window.matchMedia("(pointer: coarse)").matches,
   flight: null as Flight | null, // a guided jump between planets
 };
 
-const scrollTopFor = (i: number) => i * window.innerHeight * STOP_VH;
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+// The scroll range is read from the real document height, so the mapping stays
+// correct even when a phone's browser bars grow or shrink and change the
+// viewport height mid scroll.
+function maxScroll() {
+  return Math.max(1, document.documentElement.scrollHeight - window.innerHeight);
+}
+
+export function progressFromScroll() {
+  return clamp((window.scrollY / maxScroll()) * (STOP_COUNT - 1), 0, STOP_COUNT - 1);
+}
+
+const scrollTopFor = (i: number) => (i / (STOP_COUNT - 1)) * maxScroll();
 
 // Guided flight: one continuous eased camera move, instead of native smooth
 // scrolling that makes the camera stop at every planet on the way.
 export function scrollToStop(i: number) {
   if (!state.entered) return;
-  const to = Math.min(STOP_COUNT - 1, Math.max(0, i));
+  const to = clamp(Math.round(i), 0, STOP_COUNT - 1);
   const from = state.current;
   const dist = Math.abs(to - from);
   if (dist < 0.02) return;
@@ -32,6 +45,12 @@ export function scrollToStop(i: number) {
   state.flight = { from, to, t0: performance.now() / 1000, dur };
   state.target = to;
   window.scrollTo(0, scrollTopFor(to));
+}
+
+// next / previous planet, used by the on screen arrows
+export function stepStop(dir: 1 | -1) {
+  const base = state.flight ? state.flight.to : Math.round(state.current);
+  scrollToStop(base + dir);
 }
 
 // If the user grabs the wheel mid flight, hand control back from where we are.
@@ -46,3 +65,7 @@ export function cancelFlight() {
 export function isMobileViewport() {
   return typeof window !== "undefined" && window.innerWidth < 768;
 }
+
+// decided once at load: phones and tablets get lighter geometry and effects
+export const IS_MOBILE =
+  typeof window !== "undefined" && (window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches);
