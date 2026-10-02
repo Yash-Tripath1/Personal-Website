@@ -1,4 +1,4 @@
-// Tiny event bus so 3D scene + DOM overlay can talk to each other.
+// Tiny event bus so the 3D scene and the DOM overlay can talk to each other.
 export type ToastDetail = { text: string; x: number; y: number };
 
 export function emit<T = unknown>(name: string, detail?: T) {

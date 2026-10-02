@@ -8,6 +8,8 @@ import { dotTexture } from "./textures";
 const WORLD_W = 11;
 const GRADIENT = ["#ffc2d9", "#cdb8ff", "#b5dcff", "#b6f0d2"].map((c) => new THREE.Color(c));
 
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
 function build(step: number) {
   const W = 900;
   const H = 400;
@@ -49,7 +51,7 @@ function build(step: number) {
     target[i * 3] = tx;
     target[i * 3 + 1] = ty;
     target[i * 3 + 2] = 0;
-    // scattered start — a loose galaxy-ish disc
+    // scattered start, a loose galaxy shaped disc
     const a = Math.random() * Math.PI * 2;
     const r = 4 + Math.random() * 18;
     scatter[i * 3] = Math.cos(a) * r;
@@ -103,22 +105,25 @@ export function NameParticles({ mobile }: { mobile: boolean }) {
 
   useFrame((s, dt) => {
     const g = group.current;
-    g.visible = state.current < 1.8;
+    // fade the name away smoothly as the camera leaves, and back in on return
+    const k = clamp((2.2 - state.current) / 0.9, 0, 1);
+    const appear = k * k * (3 - 2 * k);
+    g.visible = appear > 0.002;
     if (!data || !g.visible) return;
     const aspect = s.size.width / s.size.height;
     const D = cameraDistance(0, aspect);
     const W = visibleHeight(D) * aspect;
     const sc = Math.min(1, (W * 0.9) / WORLD_W);
-    g.scale.setScalar(sc);
+    g.scale.setScalar(sc * Math.max(appear, 0.0001));
     g.position.set(0, aspect < 1 ? 0.6 : 0.9, 0);
 
     const t = s.clock.elapsedTime;
     const since = state.entered ? performance.now() / 1000 - state.enterTime : -1;
 
-    // mouse -> local space of the particle plane
+    // mouse in the local space of the particle plane
     let mx = 1e5;
     let my = 1e5;
-    if (moved.current) {
+    if (moved.current && appear > 0.9) {
       s.raycaster.setFromCamera(s.pointer, s.camera);
       if (s.raycaster.ray.intersectPlane(plane, hit)) {
         mx = (hit.x - g.position.x) / sc;
@@ -132,7 +137,7 @@ export function NameParticles({ mobile }: { mobile: boolean }) {
     const R = 1.5;
     const R2 = R * R;
     const push = 120 * h;
-    const k = 18 * h;
+    const kk = 18 * h;
     for (let i = 0; i < n; i++) {
       const ix = i * 3;
       const assembled = since - delay[i] > 0;
@@ -146,9 +151,9 @@ export function NameParticles({ mobile }: { mobile: boolean }) {
         ty = scatter[ix + 1] + Math.cos(t * 0.27 + i * 1.3) * 0.4;
         tz = scatter[ix + 2];
       }
-      vel[ix] += (tx - pos[ix]) * k;
-      vel[ix + 1] += (ty - pos[ix + 1]) * k;
-      vel[ix + 2] += (tz - pos[ix + 2]) * k;
+      vel[ix] += (tx - pos[ix]) * kk;
+      vel[ix + 1] += (ty - pos[ix + 1]) * kk;
+      vel[ix + 2] += (tz - pos[ix + 2]) * kk;
       if (assembled) {
         const dx = pos[ix] - mx;
         const dy = pos[ix + 1] - my;

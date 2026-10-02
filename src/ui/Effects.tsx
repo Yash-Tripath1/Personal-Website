@@ -3,6 +3,9 @@ import { on, type ToastDetail } from "../lib/bus";
 
 type T = ToastDetail & { id: number };
 
+// how long a message stays on screen
+const TOAST_MS = 3800;
+
 export function Toasts() {
   const [items, setItems] = useState<T[]>([]);
   const id = useRef(0);
@@ -11,8 +14,9 @@ export function Toasts() {
     () =>
       on<ToastDetail>("toast", (d) => {
         const n = ++id.current;
-        setItems((l) => [...l.slice(-4), { ...d, id: n }]);
-        window.setTimeout(() => setItems((l) => l.filter((t) => t.id !== n)), 1900);
+        // keep at most two on screen so nothing piles up
+        setItems((l) => [...l.slice(-1), { ...d, id: n }]);
+        window.setTimeout(() => setItems((l) => l.filter((t) => t.id !== n)), TOAST_MS + 100);
       }),
     [],
   );
@@ -22,11 +26,11 @@ export function Toasts() {
       {items.map((t) => (
         <div
           key={t.id}
-          className="absolute whitespace-nowrap rounded-full border border-white/25 bg-white/15 px-4 py-2 font-display text-[15px] italic text-cream shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-md"
+          className="absolute whitespace-nowrap rounded-full border border-white/25 bg-[#241b46]/80 px-4 py-2 font-display text-[15px] italic text-cream shadow-[0_10px_40px_-10px_rgba(0,0,0,0.6)] backdrop-blur-md"
           style={{
             left: Math.min(Math.max(t.x, 120), window.innerWidth - 120),
             top: t.y,
-            animation: "floatUp 1.8s cubic-bezier(.2,.8,.2,1) forwards",
+            animation: `floatUp ${TOAST_MS}ms cubic-bezier(.2,.7,.2,1) forwards`,
           }}
         >
           {t.text}

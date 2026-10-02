@@ -39,7 +39,7 @@ export function Preloader({ onEnter, leaving }: { onEnter: (sound: boolean) => v
           {String(p).padStart(2, "0")}
           <span className="text-blush">%</span>
         </div>
-        <p className="mt-2 font-display text-lg italic text-lilac md:text-2xl">building a tiny universe…</p>
+        <p className="mt-2 font-display text-lg italic text-lilac md:text-2xl">loading the universe…</p>
       </div>
 
       <div className="relative mt-10 h-8 w-[78vw] max-w-[520px]">
@@ -48,10 +48,7 @@ export function Preloader({ onEnter, leaving }: { onEnter: (sound: boolean) => v
           className="absolute left-0 top-6 h-[2px] rounded bg-gradient-to-r from-blush via-lilac to-mint"
           style={{ width: `${p}%` }}
         />
-        <div
-          className="absolute top-0 -translate-x-1/2 text-2xl"
-          style={{ left: `${p}%`, transform: "translateX(-50%) scaleX(-1)" }}
-        >
+        <div className="absolute top-0 text-2xl" style={{ left: `${p}%`, transform: "translateX(-50%) scaleX(-1)" }}>
           🦖
         </div>
       </div>
@@ -64,13 +61,13 @@ export function Preloader({ onEnter, leaving }: { onEnter: (sound: boolean) => v
           onClick={() => onEnter(true)}
           className="rounded-full bg-cream px-7 py-3.5 font-sans text-sm font-bold text-ink transition hover:scale-105 hover:bg-blush"
         >
-          ♪ Launch · with music
+          ♪ Launch with music
         </button>
         <button
           onClick={() => onEnter(false)}
           className="rounded-full border border-cream/40 px-7 py-3.5 font-sans text-sm font-medium text-cream transition hover:bg-white/10"
         >
-          Launch · silent
+          Launch silent
         </button>
       </div>
     </div>

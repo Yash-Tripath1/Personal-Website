@@ -23,22 +23,27 @@ import {
 const dummyTex = new THREE.DataTexture(new Uint8Array([0, 0, 0, 255]), 1, 1);
 dummyTex.needsUpdate = true;
 
+// a planet ignores further clicks for this long after one registers
+const CLICK_COOLDOWN_MS = 3000;
+
 const rand = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 
 const MESSAGES: Record<string, string[]> = {
-  surfgambit: ["parse → layout → paint ✓", "re-rendering the world…", "<html> loading…"],
+  surfgambit: ["parse, layout, paint ✓", "re-rendering the world…", "<html> loading…"],
   vynt: ["say cheese 📸", "click! ✨", "y2k forever 💿"],
   memoir: ["did u eat?? 🍜", "lol remember that trip 😭", "ok but sending this to the scrapbook 📎", "goodnight 🌙"],
   klar: ["Hallo! 👋", "Guten Tag!", "Wie geht's? 🌿", "Alles klar!"],
-  roadsos: ["SOS ping sent · help is on the way 🚑", "location shared · stay calm 🛟"],
+  roadsos: ["SOS ping sent, help is on the way 🚑", "location shared, stay calm 🛟"],
   shakespeare: [
     "Shall I compare thee to a cloudy sky?",
     "What light through yonder window breaks…",
-    "Good night, good night! parting is such sweet code.",
+    "Good night, good night! Parting is such sweet code.",
     "The lady doth compile too much, methinks.",
   ],
   forge: ["stamp! 🖌️", "flow engine: on", "exporting to Krita…"],
 };
+
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 export function Planet({ index, project }: { index: number; project: Project }) {
   const [x, y, z] = stopPos(index);
@@ -50,6 +55,7 @@ export function Planet({ index, project }: { index: number; project: Project }) 
   const pulse = useRef(0);
   const modeAcc = useRef(0);
   const lastWord = useRef("");
+  const lastClick = useRef(-1e9);
 
   const colors = useMemo(() => project.colors.map((c) => new THREE.Color(c)), [project]);
   const uniforms = useMemo(
@@ -85,10 +91,13 @@ export function Planet({ index, project }: { index: number; project: Project }) 
     root.current.visible = d < 2.3;
     if (d >= 2.3) return;
     const t = s.clock.elapsedTime;
+    // planets grow into view as the camera approaches, so nothing pops in
+    const k = clamp((2.3 - d) / 0.9, 0, 1);
+    const appear = k * k * (3 - 2 * k);
     hover.current += ((hovering.current ? 1 : 0) - hover.current) * Math.min(1, dt * 6);
     pulse.current = Math.max(0, pulse.current - dt * 0.8);
     mesh.current.rotation.y += dt * project.rotSpeed * (1 + hover.current * 1.6);
-    const sc = 1 + hover.current * 0.04 + Math.sin(pulse.current * Math.PI) * 0.05;
+    const sc = (1 + hover.current * 0.04 + Math.sin(pulse.current * Math.PI) * 0.05) * Math.max(appear, 0.0001);
     root.current.scale.setScalar(sc);
     root.current.position.y = y + Math.sin(t * 0.5 + index) * 0.12;
 
@@ -120,6 +129,11 @@ export function Planet({ index, project }: { index: number; project: Project }) 
   const onClick = (e: { stopPropagation: () => void; nativeEvent: MouseEvent }) => {
     if (!active()) return;
     e.stopPropagation();
+    // spam protection: one reaction at a time
+    const now = performance.now();
+    if (now - lastClick.current < CLICK_COOLDOWN_MS) return;
+    lastClick.current = now;
+
     pulse.current = 1;
     const { clientX: cx, clientY: cy } = e.nativeEvent;
     switch (project.id) {

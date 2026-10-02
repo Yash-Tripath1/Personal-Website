@@ -1,4 +1,4 @@
-// One uber-shader, one branch per project planet. Everything is procedural.
+// One uber shader, one branch per project planet. Everything is procedural.
 
 export const planetVertex = /* glsl */ `
   varying vec2 vUv;
@@ -72,7 +72,7 @@ export const planetFragment = /* glsl */ `
     return s;
   }
 
-  // ---- 0 · SurfGambit: wireframe -> layout boxes -> paint ----------------
+  // 0: SurfGambit, wireframe then layout boxes then paint
   vec3 surfgambit(vec2 uv, vec3 p, out vec3 glow) {
     float phase = fract((uTime - uStart) * 0.07);
     float r = 1.3 - 2.6 * smoothstep(0.05, 0.85, phase);
@@ -102,7 +102,7 @@ export const planetFragment = /* glsl */ `
     return c;
   }
 
-  // ---- 1 · Vynt: Y2K filter modes ----------------------------------------
+  // 1: Vynt, Y2K filter modes
   vec3 vyntBase(vec2 uv) {
     float b = sin((uv.y * 9.0 + sin(uv.x * 14.0 + uTime * 0.6) * 0.35 + uTime * 0.15) * 6.2831);
     float b2 = sin((uv.y * 4.0 - uv.x * 6.0 - uTime * 0.2) * 6.2831);
@@ -130,7 +130,7 @@ export const planetFragment = /* glsl */ `
     return c;
   }
 
-  // ---- 2 · Memoir: paper patchwork ---------------------------------------
+  // 2: Memoir, paper patchwork
   vec3 memoir(vec2 uv, vec3 p) {
     vec2 g = vec2(uv.x * 16.0, uv.y * 8.0);
     vec2 id = floor(g);
@@ -147,7 +147,7 @@ export const planetFragment = /* glsl */ `
     return paper;
   }
 
-  // ---- 3 · Veyra: hashed aura -------------------------------------------
+  // 3: Veyra, hashed aura
   vec3 veyra(vec3 p, out vec3 glow) {
     float fr = uFreq;
     float t = uTime * 0.25 * fr;
@@ -165,7 +165,7 @@ export const planetFragment = /* glsl */ `
     return c * pulse;
   }
 
-  // ---- 4 · Klar: calm continents -----------------------------------------
+  // 4: Klar, calm continents
   vec3 klar(vec3 p) {
     float h = fbm(p * 2.1 + vec3(3.0, 1.0, 7.0));
     float land = smoothstep(0.5, 0.535, h);
@@ -181,7 +181,7 @@ export const planetFragment = /* glsl */ `
     return c;
   }
 
-  // ---- 5 · RoadSOS: glowing roads + beacon -------------------------------
+  // 5: RoadSOS, glowing roads and a beacon
   vec3 roadsos(vec3 p, out vec3 glow) {
     vec3 base = mix(uD, uD * 1.6, fbm(p * 3.0));
     float r1 = pow(1.0 - abs(fbm(p * 3.2 + 1.0) * 2.0 - 1.0), 10.0);
@@ -195,7 +195,7 @@ export const planetFragment = /* glsl */ `
     return base;
   }
 
-  // ---- 6 · Shakespeare-GPT: parchment of letters -------------------------
+  // 6: Shakespeare GPT, parchment of letters
   vec3 shakespeare(vec2 uv, vec3 p) {
     float m = texture2D(uTex, uv).r;
     float stain = fbm(p * 3.5);
@@ -206,7 +206,7 @@ export const planetFragment = /* glsl */ `
     return c;
   }
 
-  // ---- 7 · Forge: stamped dabs ------------------------------------------
+  // 7: Forge, stamped dabs
   vec3 forge(vec3 p) {
     vec3 q = p * 5.0;
     vec3 b = floor(q - 0.5);

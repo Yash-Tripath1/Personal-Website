@@ -2,7 +2,7 @@ import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { HOME, CONTACT, state } from "../lib/state";
-import { PLANET_R, stopPos } from "../lib/layout";
+import { PLANET_R, cameraDistance, stopPos, visibleHeight } from "../lib/layout";
 import { on, setCursorLabel, toast, emit } from "../lib/bus";
 import { sfx } from "../lib/audio";
 import { atmoFragment, atmoVertex, planetFragment, planetVertex } from "./shaders";
@@ -12,6 +12,12 @@ dummyTex.needsUpdate = true;
 
 const MINT = "#9fe6bd";
 const PEACH = "#ffb29e";
+
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+const appearFor = (d: number) => {
+  const k = clamp((2.3 - d) / 0.9, 0, 1);
+  return k * k * (3 - 2 * k);
+};
 
 function Dino({ jump }: { jump: MutableRefObject<number> }) {
   const root = useRef<THREE.Group>(null!);
@@ -58,7 +64,7 @@ function Dino({ jump }: { jump: MutableRefObject<number> }) {
           <meshStandardMaterial color={PEACH} flatShading />
         </mesh>
       ))}
-      {/* neck + head */}
+      {/* neck and head */}
       <mesh position={[0.62, 1.2, 0]} rotation={[0, 0, -0.5]}>
         <capsuleGeometry args={[0.17, 0.5, 6, 10]} />
         <meshStandardMaterial color={MINT} flatShading />
@@ -129,6 +135,8 @@ const SKILLS = [
   { c: "#ff9fb8", r: 4.8, s: -0.15, i: 0.6, sz: 0.21 },
 ];
 
+const ROAR_COOLDOWN_MS = 3000;
+
 export function HomePlanet() {
   const [x, y, z] = stopPos(HOME);
   const root = useRef<THREE.Group>(null!);
@@ -136,6 +144,7 @@ export function HomePlanet() {
   const pivot = useRef<THREE.Group>(null!);
   const sats = useRef<THREE.Mesh[]>([]);
   const jump = useRef(0);
+  const lastRoar = useRef(-1e9);
 
   const uniforms = useMemo(
     () => ({
@@ -168,6 +177,7 @@ export function HomePlanet() {
     const t = s.clock.elapsedTime;
     uniforms.uTime.value = t;
     mesh.current.rotation.y += dt * 0.05;
+    root.current.scale.setScalar(Math.max(appearFor(d), 0.0001));
     root.current.position.y = y + Math.sin(t * 0.5) * 0.1;
     pivot.current.rotation.z = -t * 0.45;
     sats.current.forEach((m, i) => {
@@ -181,6 +191,9 @@ export function HomePlanet() {
   const roar = (e: { stopPropagation: () => void; nativeEvent: MouseEvent }) => {
     if (Math.abs(state.current - HOME) > 0.6) return;
     e.stopPropagation();
+    const now = performance.now();
+    if (now - lastRoar.current < ROAR_COOLDOWN_MS) return;
+    lastRoar.current = now;
     jump.current = 1;
     sfx("roar");
     toast("RAWR 🦖", e.nativeEvent.clientX, e.nativeEvent.clientY);
@@ -205,7 +218,7 @@ export function HomePlanet() {
         />
       </mesh>
 
-      {/* the dino walks around the planet, Little-Prince style */}
+      {/* the dino walks around the planet, Little Prince style */}
       <group rotation={[0.5, 0, 0]}>
         <group ref={pivot}>
           <group
@@ -237,7 +250,7 @@ export function HomePlanet() {
   );
 }
 
-/* A wireframe "lock" floating at the contact stop — cybersecurity vibes */
+/* A wireframe lock floating at the contact stop. It is sized and dimmed so the terminal text stays readable. */
 export function ContactLock() {
   const [x, y, z] = stopPos(CONTACT);
   const root = useRef<THREE.Group>(null!);
@@ -260,6 +273,21 @@ export function ContactLock() {
     root.current.visible = d < 2.3;
     if (d >= 2.3) return;
     const t = s.clock.elapsedTime;
+
+    // shrink to the free space left of the terminal card
+    const w = s.size.width;
+    const h = s.size.height;
+    const aspect = w / h;
+    let fit = 0.75;
+    if (aspect >= 1) {
+      const ppu = h / visibleHeight(cameraDistance(CONTACT, aspect));
+      const centre = w * (0.5 - 0.33);
+      const cardLeft = w * 0.95 - Math.min(640, w * 0.9);
+      const free = Math.max(0, cardLeft - 24 - centre);
+      fit = clamp(free / (3.6 * ppu), 0.4, 0.85);
+    }
+    root.current.scale.setScalar(Math.max(appearFor(d), 0.0001) * fit);
+
     knot.current.rotation.x += dt * 0.25;
     knot.current.rotation.y += dt * 0.35;
     core.current.rotation.y -= dt * 0.6;
@@ -272,17 +300,17 @@ export function ContactLock() {
     <group ref={root} position={[x, y, z]}>
       <mesh ref={knot}>
         <torusKnotGeometry args={[1.45, 0.34, 160, 18, 2, 3]} />
-        <meshBasicMaterial color="#b6f0d2" wireframe transparent opacity={0.55} />
+        <meshBasicMaterial color="#b6f0d2" wireframe transparent opacity={0.32} />
       </mesh>
       <mesh ref={core}>
         <icosahedronGeometry args={[0.7, 1]} />
-        <meshBasicMaterial color={new THREE.Color("#ffc2d9").multiplyScalar(1.5)} wireframe toneMapped={false} />
+        <meshBasicMaterial color={new THREE.Color("#ffc2d9").multiplyScalar(1.1)} wireframe transparent opacity={0.6} />
       </mesh>
       <group ref={bits}>
         {bitData.map((b, i) => (
           <mesh key={i} position={[Math.cos(b.a) * b.r, b.y * 2.6, Math.sin(b.a) * b.r]}>
             <boxGeometry args={[b.s * 2, b.s * 2, b.s * 2]} />
-            <meshBasicMaterial color={i % 2 ? "#cdb8ff" : "#b5dcff"} />
+            <meshBasicMaterial color={i % 2 ? "#cdb8ff" : "#b5dcff"} transparent opacity={0.6} />
           </mesh>
         ))}
       </group>
@@ -290,7 +318,7 @@ export function ContactLock() {
   );
 }
 
-/* Meteor shower — triggered by clicking the dino, the terminal, or the Konami code */
+/* Meteor shower, triggered by clicking the dino, the terminal, or the Konami code */
 export function Meteors() {
   const group = useRef<THREE.Group>(null!);
   const start = useRef(-1);
@@ -310,7 +338,16 @@ export function Meteors() {
   const dir = useMemo(() => new THREE.Vector3(-1, -0.7, 0).normalize(), []);
   const quat = useMemo(() => new THREE.Quaternion().setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir), [dir]);
 
-  useEffect(() => on("meteor", () => (start.current = performance.now() / 1000)), []);
+  useEffect(
+    () =>
+      on("meteor", () => {
+        const now = performance.now() / 1000;
+        // ignore repeat triggers while a shower is still running
+        if (start.current >= 0 && now - start.current < 3.6) return;
+        start.current = now;
+      }),
+    [],
+  );
 
   useFrame((s) => {
     group.current.position.copy(s.camera.position);

@@ -57,7 +57,7 @@ export function verseRingTexture() {
   g.textBaseline = "middle";
   g.font = `italic 700 62px Georgia, serif`;
   const text = "To thine own self be true  ✦  Brevity is the soul of wit  ✦  All that glisters is not gold  ✦  ";
-  let x = 10;
+  const x = 10;
   const w = g.measureText(text).width;
   g.save();
   g.scale(c.width / Math.max(w + 20, c.width), 1);
@@ -108,7 +108,7 @@ export function dotTexture() {
 }
 
 export function hashWord(word: string) {
-  // cyrb53 — small, fast, good-enough deterministic hash
+  // cyrb53: small, fast, deterministic hash
   let h1 = 0xdeadbeef,
     h2 = 0x41c6ce57;
   for (let i = 0; i < word.length; i++) {
@@ -125,7 +125,7 @@ export function auraFromWord(word: string) {
   const [a, b] = hashWord(word.trim().toLowerCase() || "void");
   const hue = (a % 360) / 360;
   const sat = 0.65 + ((b >>> 3) % 20) / 100;
-  const freq = 0.7 + ((a >>> 9) % 100) / 40; // 0.7 – 3.2
+  const freq = 0.7 + ((a >>> 9) % 100) / 40; // 0.7 to 3.2
   const form = (b >>> 5) % 3;
   const c1 = new THREE.Color().setHSL(hue, sat, 0.78);
   const c2 = new THREE.Color().setHSL((hue + 0.12) % 1, sat, 0.8);

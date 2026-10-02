@@ -1,17 +1,16 @@
 import { useEffect, useRef, useState } from "react";
-import { PROJECTS, LINKS } from "../data/projects";
+import { LINKS, PROJECTS } from "../data/projects";
+import { emit } from "../lib/bus";
 import { HOME, scrollToStop } from "../lib/state";
-import { emit, toast } from "../lib/bus";
 
-type Line = { kind: "in" | "out" | "sys"; text: string; href?: string };
+type Line = { kind: "in" | "out"; text: string; href?: string };
 
-const BANNER: Line[] = [
-  { kind: "sys", text: "cosmos-shell v1.0 · connection secure (probably)" },
-  { kind: "sys", text: "type `help` to see what I can do. try `sudo` if you dare." },
-];
+const out = (...t: string[]): Line[] => t.map((text) => ({ kind: "out", text }));
 
-export function Terminal({ onToggleMusic }: { onToggleMusic: () => string }) {
-  const [lines, setLines] = useState<Line[]>(BANNER);
+const SUGGESTIONS = ["help", "projects", "contact", "music", "fly home"];
+
+export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
+  const [lines, setLines] = useState<Line[]>(() => out("Welcome. Type help to see what you can ask."));
   const [value, setValue] = useState("");
   const [hist, setHist] = useState<string[]>([]);
   const [hi, setHi] = useState(-1);
@@ -22,9 +21,7 @@ export function Terminal({ onToggleMusic }: { onToggleMusic: () => string }) {
     box.current?.scrollTo({ top: box.current.scrollHeight });
   }, [lines]);
 
-  const out = (...t: string[]): Line[] => t.map((text) => ({ kind: "out", text }));
-
-  const exec = (raw: string): Line[] | null => {
+  const exec = (raw: string): Line[] => {
     const [cmd, ...args] = raw.trim().split(/\s+/);
     const arg = args.join(" ").toLowerCase();
     switch (cmd.toLowerCase()) {
@@ -32,102 +29,87 @@ export function Terminal({ onToggleMusic }: { onToggleMusic: () => string }) {
         return out(
           "about · whoami · projects · skills · interests · education",
           "contact · email · github · linkedin · glymph",
-          "fly <planet> · music · dino · meteor · clear",
-          "(there are a few hidden ones. security people love secrets.)",
+          "fly <planet> · music [name] · dino · meteor · clear",
         );
       case "about":
         return out(
-          "Anadi Tripathi (Yashh) · 18 · Lucknow, India.",
-          "self-taught dev. BCA + IIT Madras BS Data Science.",
-          "ships end-to-end: a browser engine, an LLM from scratch, desktop + web apps.",
+          "Anadi Tripathi, 18, from Lucknow, India.",
+          "Self taught developer. BCA and IIT Madras BS in Data Science.",
+          "I build end to end: a browser engine, an LLM from scratch, desktop and web apps.",
         );
       case "whoami":
-        return out("yashh // anadi tripathi // uid=18 // gid=builders");
+        return out("Anadi Tripathi, developer and cofounder of Glymph Studio.");
       case "projects":
       case "ls":
-        return PROJECTS.map((p, i) => ({ kind: "out" as const, text: `${String(i + 1).padStart(2, "0")}  ${p.name.padEnd(16)} ${p.kind}` }));
+        return [
+          ...PROJECTS.map((p, i) => ({
+            kind: "out" as const,
+            text: `${String(i + 1).padStart(2, "0")}  ${p.name.padEnd(16)} ${p.live ? "live ↗" : "github ↗"}`,
+            href: p.live ?? p.repo,
+          })),
+          ...out("Click a line to open it, or try: fly klar"),
+        ];
       case "skills":
         return out(
-          "langs:   Python · JavaScript · TypeScript · HTML/CSS",
-          "tools:   React · Vite · Node/Express · Tailwind · Electron · Firebase · Git",
-          "ai:      LLM APIs (Groq) · llama.cpp / Ollama · training from scratch · prompt design",
-          "other:   Linux (Ubuntu) · n8n · Vercel",
+          "langs:  Python · JavaScript · TypeScript · HTML and CSS",
+          "tools:  React · Vite · Node and Express · Tailwind · Electron · Firebase · Git",
+          "ai:     LLM APIs (Groq) · llama.cpp and Ollama · training from scratch",
+          "other:  Linux (Ubuntu) · n8n · Vercel",
         );
       case "interests":
-        return out("🛡  cybersecurity   🦖 dinosaurs   🎵 music   🧠 AI/ML   🛠  building products");
+        return out("🛡 cybersecurity   🦖 dinosaurs   🎵 music   🧠 AI and ML   🛠 building products");
       case "education":
         return out(
-          "IIT Madras · BS Data Science & Applications (online, ongoing)",
-          "University of Lucknow · BCA (Aug 2026 – present)",
+          "IIT Madras · BS Data Science and Applications (online, ongoing)",
+          "University of Lucknow · BCA (from Aug 2026)",
         );
       case "contact":
         return [
-          ...out("let's talk:"),
+          ...out("Let's talk:"),
           { kind: "out", text: `  ✉  ${LINKS.email}`, href: `mailto:${LINKS.email}` },
-          { kind: "out", text: "  ⌥  github.com/Yash-Tripath1", href: LINKS.github },
-          { kind: "out", text: "  in linkedin.com/in/anadi-tripathi-4a33543a6", href: LINKS.linkedin },
+          { kind: "out", text: "  GitHub profile ↗", href: LINKS.github },
+          { kind: "out", text: "  LinkedIn profile ↗", href: LINKS.linkedin },
+          ...out("  (Yash is my nickname, that's why my GitHub says Yash)"),
         ];
       case "email":
         return [{ kind: "out", text: LINKS.email, href: `mailto:${LINKS.email}` }];
       case "github":
-        return [{ kind: "out", text: LINKS.github, href: LINKS.github }];
+        return [
+          { kind: "out", text: "GitHub profile ↗", href: LINKS.github },
+          ...out(LINKS.githubNote),
+        ];
       case "linkedin":
-        return [{ kind: "out", text: LINKS.linkedin, href: LINKS.linkedin }];
+        return [{ kind: "out", text: "LinkedIn profile ↗", href: LINKS.linkedin }];
       case "glymph":
         return [
-          ...out("Glymph Studio: indie dev studio shipping tools & apps fast."),
-          { kind: "out", text: LINKS.glymph, href: LINKS.glymph },
+          ...out("Glymph Studio: an indie dev studio shipping tools and apps fast."),
+          { kind: "out", text: "Glymph Studio on GitHub ↗", href: LINKS.glymph },
         ];
       case "fly": {
-        if (!arg) return out("usage: fly <planet>   e.g. fly klar");
+        if (!arg) return out("usage: fly <planet>, for example: fly klar");
         if (["home", "about", "dino"].includes(arg)) {
           scrollToStop(HOME);
-          return out("engaging thrusters → home planet 🌍");
+          return out("Flying to the home planet 🌍");
         }
         if (["top", "start", "hello"].includes(arg)) {
           scrollToStop(0);
-          return out("returning to the start ↑");
+          return out("Heading back to the start ↑");
         }
-        const i = PROJECTS.findIndex((p) => p.id.includes(arg) || p.name.toLowerCase().includes(arg));
-        if (i < 0) return out(`no planet called "${arg}". try \`projects\`.`);
+        const q = arg.replace(/\s+/g, "");
+        const i = PROJECTS.findIndex((p) => p.id.includes(q) || p.name.toLowerCase().replace(/\s+/g, "").includes(q));
+        if (i < 0) return out(`No planet called "${arg}". Try projects.`);
         scrollToStop(i + 1);
-        return out(`engaging thrusters → ${PROJECTS[i].name} 🚀`);
+        return out(`Flying to ${PROJECTS[i].name} 🚀`);
       }
       case "music":
-        return out(onToggleMusic());
+        return out(...onMusic(arg).split("\n"));
       case "dino":
-        return out("        __", "       / _)    RAWR.", "  _.-^^^/ /", " /       /    (click the dino on the home planet too)");
+        return out("RAWR. The little dino lives on the home planet, go say hi.");
       case "meteor":
         emit("meteor");
-        return out("incoming. 🌠");
-      case "sudo":
-        return out("anadi is not in the sudoers file. this incident will be reported. 🚨");
-      case "nmap":
-        return out(
-          "Starting Nmap 7.94 ( https://nmap.org )",
-          "All 1000 scanned ports are filtered.",
-          "(good. I like it that way.)",
-        );
-      case "hack":
-      case "hacker":
-        return out("[■■■■■■■□□□] 70%  bypassing firewall…", "ACCESS DENIED. I do defense, not offense. 🛡");
-      case "ping":
-        return out("PONG from Lucknow · 0% packet loss · ~∞ chai");
-      case "rm":
-        return out("rm: refusing to destroy the universe. 🌌");
-      case "cat":
-        return out(arg.includes("secret") ? "nice try. 🔒" : "meow? that's not how this works.");
-      case "date":
-        return out(new Date().toString());
-      case "echo":
-        return out(args.join(" "));
-      case "exit":
-        return out("you can't leave. it's a whole universe out here.");
-      case "xyzzy":
-      case "42":
-        return out("a hollow voice says “fool.” (+1 nerd point)");
+        return out("Incoming. 🌠");
       default:
-        return out(`command not found: ${cmd}. type \`help\`.`);
+        return out(`command not found: ${cmd}. Type help.`);
     }
   };
 
@@ -141,25 +123,35 @@ export function Terminal({ onToggleMusic }: { onToggleMusic: () => string }) {
       return;
     }
     const res = exec(cmd);
-    if (cmd.toLowerCase() === "sudo") toast("🚨 incident reported");
-    setLines((l) => [...l, { kind: "in", text: cmd }, ...(res ?? [])]);
+    setLines((l) => [...l, { kind: "in", text: cmd }, ...res]);
   };
 
   return (
-    <div className="card glass w-full overflow-hidden rounded-[22px] md:max-w-[640px]" onClick={() => input.current?.focus({ preventScroll: true })}>
-      <div className="flex items-center gap-2 border-b border-white/10 px-4 py-3">
+    <div
+      className="card glass-solid w-full overflow-hidden rounded-[22px] md:max-w-[640px]"
+      onClick={() => input.current?.focus({ preventScroll: true })}
+    >
+      <div className="flex items-center gap-2 border-b border-white/10 bg-black/20 px-4 py-2.5">
         <span className="h-3 w-3 rounded-full bg-[#ff9fb8]" />
         <span className="h-3 w-3 rounded-full bg-[#ffe29a]" />
         <span className="h-3 w-3 rounded-full bg-[#9fe6bd]" />
-        <span className="ml-3 font-mono text-[11px] text-cream/60">yashh@cosmos: ~</span>
+        <span className="ml-3 font-mono text-[11px] text-cream/60">anadi@cosmos: ~</span>
       </div>
 
-      <div ref={box} className="term-scroll h-[190px] overflow-y-auto px-4 py-3 font-mono text-[12.5px] leading-relaxed md:h-[250px] md:text-[13px]">
+      <div
+        ref={box}
+        className="term-scroll h-[190px] overflow-y-auto px-4 py-3 font-mono text-[12.5px] leading-relaxed text-cream md:h-[250px] md:text-[13px]"
+      >
         {lines.map((l, i) => (
-          <div key={i} className={l.kind === "in" ? "text-mint" : l.kind === "sys" ? "text-lilac/80" : "text-cream/90"}>
+          <div key={i} className={l.kind === "in" ? "text-cream" : "text-cream/90"}>
             {l.kind === "in" && <span className="mr-2 text-blush">❯</span>}
             {l.href ? (
-              <a href={l.href} target="_blank" rel="noreferrer" className="underline decoration-blush/60 underline-offset-4 hover:text-blush">
+              <a
+                href={l.href}
+                target="_blank"
+                rel="noreferrer"
+                className="whitespace-pre-wrap underline decoration-blush/60 underline-offset-4 hover:text-blush"
+              >
                 {l.text}
               </a>
             ) : (
@@ -170,12 +162,12 @@ export function Terminal({ onToggleMusic }: { onToggleMusic: () => string }) {
       </div>
 
       <form
-        className="flex items-center gap-2 border-t border-white/10 px-4 py-3 font-mono text-[13px]"
         onSubmit={(e) => {
           e.preventDefault();
           submit(value);
           setValue("");
         }}
+        className="flex items-center gap-2 border-t border-white/10 px-4 py-2.5 font-mono text-[13px]"
       >
         <span className="text-blush">❯</span>
         <input
@@ -197,24 +189,24 @@ export function Terminal({ onToggleMusic }: { onToggleMusic: () => string }) {
               setValue(n >= 0 ? hist[n] : "");
             }
           }}
-          placeholder="type a command…"
-          autoCapitalize="off"
-          autoCorrect="off"
+          placeholder="type a command"
           spellCheck={false}
+          autoComplete="off"
+          autoCapitalize="off"
           className="min-w-0 flex-1 bg-transparent text-cream outline-none placeholder:text-cream/30"
-          aria-label="Terminal input"
         />
       </form>
 
-      <div className="flex flex-wrap gap-1.5 px-4 pb-4">
-        {["help", "projects", "contact", "sudo", "music"].map((c) => (
+      <div className="flex flex-wrap gap-1.5 px-4 pb-3">
+        {SUGGESTIONS.map((c) => (
           <button
             key={c}
+            type="button"
             onClick={(e) => {
               e.stopPropagation();
               submit(c);
             }}
-            className="rounded-full border border-white/20 px-3 py-1 font-mono text-[11px] text-cream/80 transition hover:bg-white/15"
+            className="rounded-full border border-white/20 px-2.5 py-1 font-mono text-[11px] text-cream/75 transition hover:bg-white/10 hover:text-cream"
           >
             {c}
           </button>

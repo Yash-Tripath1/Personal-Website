@@ -32,7 +32,7 @@ function Plane({
   );
 }
 
-/* ---------------- SurfGambit: three browser panes (parse / layout / paint) ---- */
+/* SurfGambit: three browser panes (parse, layout, paint) */
 function Pane({ kind }: { kind: 0 | 1 | 2 }) {
   const edges = useMemo(() => new THREE.EdgesGeometry(new THREE.BoxGeometry(1.2, 0.76, 0.04)), []);
   const lineColor = kind === 0 ? "#b6f0d2" : kind === 1 ? "#cdb8ff" : "#ffffff";
@@ -86,7 +86,7 @@ export function SurfExtras({ pulse }: Shared) {
   );
 }
 
-/* ---------------- Vynt: RGB-split rings --------------------------------------- */
+/* Vynt: RGB split rings */
 export function VyntExtras({ pulse, hover }: Shared) {
   const refs = useRef<THREE.Mesh[]>([]);
   useFrame((s) => {
@@ -113,7 +113,7 @@ export function VyntExtras({ pulse, hover }: Shared) {
   );
 }
 
-/* ---------------- Memoir: polaroids + chat bubbles ---------------------------- */
+/* Memoir: polaroids and chat bubbles */
 export function MemoirExtras({ pulse, hover }: Shared) {
   const g = useRef<THREE.Group>(null!);
   const bubbles = useRef<THREE.Group[]>([]);
@@ -122,8 +122,7 @@ export function MemoirExtras({ pulse, hover }: Shared) {
     g.current.rotation.y = t * 0.2;
     bubbles.current.forEach((b, i) => {
       if (!b) return;
-      const pop = Math.sin(Math.min(1, 1 - pulse.current) * Math.PI) * pulse.current * 0;
-      const k = 0.7 + hover.current * 0.6 + Math.sin(pulse.current * Math.PI) * 0.9 + pop;
+      const k = 0.7 + hover.current * 0.6 + Math.sin(pulse.current * Math.PI) * 0.9;
       b.scale.setScalar(k);
       b.position.y = Math.sin(t * 0.9 + i * 2) * 0.25 + (i - 1) * 0.5;
     });
@@ -171,7 +170,7 @@ export function MemoirExtras({ pulse, hover }: Shared) {
   );
 }
 
-/* ---------------- Veyra: breathing aura shells -------------------------------- */
+/* Veyra: breathing aura shells */
 export function VeyraExtras({ pulse }: Shared) {
   const m1 = useRef<THREE.Mesh>(null!);
   const m2 = useRef<THREE.Mesh>(null!);
@@ -202,7 +201,7 @@ export function VeyraExtras({ pulse }: Shared) {
   );
 }
 
-/* ---------------- Klar: der / die / das orbs ---------------------------------- */
+/* Klar: der, die, das orbs */
 export function KlarExtras({ pulse }: Shared) {
   const refs = useRef<THREE.Mesh[]>([]);
   const cols = ["#9ccbff", "#ff9fb8", "#9fe6bd"];
@@ -228,7 +227,7 @@ export function KlarExtras({ pulse }: Shared) {
   );
 }
 
-/* ---------------- RoadSOS: beacon ring, siren satellite, SOS ping ------------- */
+/* RoadSOS: beacon ring, siren satellite, SOS ping */
 export function RoadExtras({ pulse }: Shared) {
   const ring = useRef<THREE.Mesh>(null!);
   const sat = useRef<THREE.Group>(null!);
@@ -281,7 +280,7 @@ export function RoadExtras({ pulse }: Shared) {
   );
 }
 
-/* ---------------- Shakespeare-GPT: ring of verse ------------------------------ */
+/* Shakespeare GPT: ring of verse */
 export function VerseExtras({ pulse }: Shared) {
   const g = useRef<THREE.Group>(null!);
   const tex = useMemo(() => verseRingTexture(), []);
@@ -300,19 +299,23 @@ export function VerseExtras({ pulse }: Shared) {
   );
 }
 
-/* ---------------- Forge: orbiting brush stroke -------------------------------- */
+/* Forge: orbiting brush stroke */
 export function ForgeExtras({ pulse }: Shared) {
   const g = useRef<THREE.Group>(null!);
-  const pal = ["#ffb29e", "#ffd2a8", "#ffc2d9", "#cdb8ff"];
   const dabs = useMemo(() => {
+    const pal = ["#ffb29e", "#ffd2a8", "#ffc2d9", "#cdb8ff"];
     const n = 34;
     return Array.from({ length: n }, (_, j) => {
       const k = j / (n - 1);
       const a = k * Math.PI * 1.7;
       const r = 3.45 + Math.sin(a * 2.2) * 0.18;
-      return { pos: [Math.cos(a) * r, Math.sin(a * 1.5) * 0.25, Math.sin(a) * r] as [number, number, number], size: 0.03 + k * k * 0.24, c: pal[j % 4], o: 0.25 + k * 0.75 };
+      return {
+        pos: [Math.cos(a) * r, Math.sin(a * 1.5) * 0.25, Math.sin(a) * r] as [number, number, number],
+        size: 0.03 + k * k * 0.24,
+        c: pal[j % 4],
+        o: 0.25 + k * 0.75,
+      };
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useFrame((s) => {
     g.current.rotation.y = -s.clock.elapsedTime * 0.45;

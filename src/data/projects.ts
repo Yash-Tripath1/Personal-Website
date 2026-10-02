@@ -3,26 +3,23 @@ export type Project = {
   name: string;
   kind: string;
   desc: string;
-  metaphor: string;
-  hint: string; // what clicking does
+  hint: string; // what clicking the planet does
   tags: string[];
-  live?: string; // add live URLs here
+  live?: string;
   repo: string;
-  accent: string; // UI accent (css colour)
+  accent: string; // UI accent colour
   type: number; // shader branch
   colors: [string, string, string, string]; // planet palette
   rim: string;
   rotSpeed: number;
 };
 
-// 👉 Add / change live links here — e.g. live: "https://veyra.vercel.app"
 export const PROJECTS: Project[] = [
   {
     id: "surfgambit",
     name: "SurfGambit",
     kind: "Browser engine · Python",
-    desc: "A web browser built from scratch in Python and Tkinter, following browser.engineering and implementing the core rendering pipeline: parse, layout, paint.",
-    metaphor: "A planet that renders itself: wireframe, then layout boxes, then paint.",
+    desc: "A web browser built from scratch in Python and Tkinter, following browser.engineering. It implements the core rendering pipeline: parse, layout, paint.",
     hint: "restart the render pipeline",
     tags: ["Python", "Tkinter", "Rendering"],
     repo: "https://github.com/Yash-Tripath1/SurfGambit",
@@ -35,11 +32,11 @@ export const PROJECTS: Project[] = [
   {
     id: "vynt",
     name: "Vynt",
-    kind: "Y2K photo booth · Desktop + Web",
-    desc: "Local-first Y2K-style photo booth with 8 real-time canvas filters, photo and video capture. Runs in the browser and ships as a Windows installer. No uploads, no tracking.",
-    metaphor: "A glossy Y2K planet that cycles through filter modes, with an RGB-split rim.",
-    hint: "snap a photo (flash!)",
+    kind: "Y2K photo booth · Desktop and Web",
+    desc: "A local first Y2K photo booth with 8 real time canvas filters, plus photo and video capture. Runs in the browser and ships as a Windows installer. No uploads, no tracking.",
+    hint: "snap a photo",
     tags: ["React", "TypeScript", "Canvas", "Electron"],
+    live: "https://yash-tripath1.github.io/Vynt/",
     repo: "https://github.com/Yash-Tripath1/Vynt",
     accent: "#ffc2d9",
     type: 1,
@@ -51,8 +48,7 @@ export const PROJECTS: Project[] = [
     id: "memoir",
     name: "Memoir",
     kind: "Web app · Glymph Studio",
-    desc: "Turns WhatsApp chat exports (.txt / .zip) into digital scrapbooks, with a custom chat parser and a drag, resize and rotate canvas editor with PNG export.",
-    metaphor: "A patchwork of paper tiles, with polaroids and chat bubbles orbiting as moons.",
+    desc: "Turns WhatsApp chat exports (.txt or .zip) into digital scrapbooks, with a custom chat parser and a drag, resize and rotate canvas editor with PNG export.",
     hint: "pop a chat bubble",
     tags: ["React", "Vite", "Tailwind", "Framer Motion"],
     live: "https://memoirr-sigma.vercel.app",
@@ -67,10 +63,10 @@ export const PROJECTS: Project[] = [
     id: "veyra",
     name: "Veyra",
     kind: "Generative art · Zero backend",
-    desc: "Type any text, get a deterministic generative aura: hashed into colour, frequency and form. Three pattern modes, AES-GCM shareable links, zero backend.",
-    metaphor: "An aura planet. Its colour, pulse and shape are generated from whatever you type.",
+    desc: "Type any text and get a deterministic generative aura, hashed into colour, frequency and form. Three pattern modes, AES GCM shareable links, zero backend.",
     hint: "pulse the aura",
-    tags: ["SHA-256", "AES-GCM", "Canvas", "HTML"],
+    tags: ["SHA256", "AES GCM", "Canvas", "HTML"],
+    live: "https://veyra-ivory.vercel.app",
     repo: "https://github.com/Yash-Tripath1/Veyra",
     accent: "#cdb8ff",
     type: 3,
@@ -82,8 +78,7 @@ export const PROJECTS: Project[] = [
     id: "klar",
     name: "Klar",
     kind: "Learning app · AI coach",
-    desc: "A calm A1/A2 German learning app: 50 lessons, no streak pressure, and a Klar Coach for level-aware conversation practice. der / die / das are colour-coded.",
-    metaphor: "A calm, slow planet. Its continents are der (blue), die (rose) and das (mint).",
+    desc: "A calm A1/A2 German learning app with 50 lessons, no streak pressure, and a Klar Coach for conversation practice at your level. der, die and das are colour coded.",
     hint: "say Hallo",
     tags: ["JavaScript", "Web App", "LLM Coach"],
     live: "https://klar-german.vercel.app",
@@ -98,8 +93,7 @@ export const PROJECTS: Project[] = [
     id: "roadsos",
     name: "RoadSOS",
     kind: "Hackathon · CoERS IIT Madras 2026",
-    desc: "A road-safety AI emergency-response tool with a Vite/React front end, a Node/Express backend and Groq-powered LLM inference. Built for the CoERS IIT Madras Hackathon 2026.",
-    metaphor: "A dark planet laced with glowing roads, circled by a red-and-blue beacon.",
+    desc: "A road safety AI emergency response tool with a Vite and React front end, a Node and Express backend and Groq powered LLM inference. Built for the CoERS IIT Madras Hackathon 2026.",
     hint: "send an SOS ping",
     tags: ["React", "Node", "Express", "Groq"],
     repo: "https://github.com/Yash-Tripath1/road-sos",
@@ -111,10 +105,9 @@ export const PROJECTS: Project[] = [
   },
   {
     id: "shakespeare",
-    name: "Shakespeare-GPT",
+    name: "Shakespeare GPT",
     kind: "Language model · From scratch",
-    desc: "A GPT-style language model built and trained from scratch on about 80,000 lines of Shakespeare. It covers data preparation, training and text generation.",
-    metaphor: "A parchment world whose surface is made of letters, ringed by its own verses.",
+    desc: "A GPT style language model built and trained from scratch on about 80,000 lines of Shakespeare. It covers data preparation, training and text generation.",
     hint: "summon a line of verse",
     tags: ["Python", "Transformers", "Training"],
     repo: "https://github.com/Yash-Tripath1/Shakespeare-GPT",
@@ -129,9 +122,9 @@ export const PROJECTS: Project[] = [
     name: "Forge",
     kind: "Digital brush maker · Glymph Studio",
     desc: "Turn any image into a configurable digital brush. Stamp and flow engines, with export to GIMP and Krita. Built under Glymph Studio.",
-    metaphor: "A planet painted in stamped dabs, with a brush stroke orbiting it.",
     hint: "stamp the planet",
     tags: ["HTML", "Canvas", "GIMP", "Krita"],
+    live: "https://forge-glymph1.vercel.app",
     repo: "https://github.com/Glymph-Studio/forge",
     accent: "#ffb29e",
     type: 7,
@@ -144,6 +137,7 @@ export const PROJECTS: Project[] = [
 export const LINKS = {
   email: "tripathiyash382@gmail.com",
   github: "https://github.com/Yash-Tripath1",
+  githubNote: "Yash is my nickname, which is why my GitHub username starts with it.",
   linkedin: "https://linkedin.com/in/anadi-tripathi-4a33543a6",
   glymph: "https://github.com/glymph-studio",
 };
