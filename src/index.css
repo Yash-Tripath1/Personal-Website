@@ -164,6 +164,7 @@ html {
   }
 }
 
+<<<<<<< HEAD
 /* phones: no rubber-band purple stretch or pull-to-refresh fighting the scroll */
 html,
 body {
@@ -203,6 +204,8 @@ body {
   }
 }
 
+=======
+>>>>>>> 3cce336bc5028c8c18f3765cd4cd6268d6f99cfc
 @keyframes blink {
   0%,
   49% {
