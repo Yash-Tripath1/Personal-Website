@@ -4,7 +4,8 @@ import { BlendFunction } from "postprocessing";
 import { PROJECTS } from "../data/projects";
 import { FOV } from "../lib/layout";
 import { CameraRig } from "./CameraRig";
-import { ContactLock, HomePlanet, Meteors } from "./Home";
+import { ContactAstronaut } from "./Astronaut";
+import { HomePlanet, Meteors } from "./Home";
 import { NameParticles } from "./NameParticles";
 import { Planet } from "./Planet";
 import { Nebula, Stars } from "./Space";
@@ -31,7 +32,7 @@ export default function Scene({ mobile }: { mobile: boolean }) {
         <Planet key={p.id} index={i + 1} project={p} />
       ))}
       <HomePlanet />
-      <ContactLock />
+      <ContactAstronaut />
       <Meteors />
 
       <EffectComposer multisampling={mobile ? 0 : 4}>

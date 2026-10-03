@@ -46,3 +46,7 @@ export function cancelFlight() {
 export function isMobileViewport() {
   return typeof window !== "undefined" && window.innerWidth < 768;
 }
+
+// decided once at load: phones and tablets get lighter geometry and effects
+export const IS_MOBILE =
+  typeof window !== "undefined" && (window.innerWidth < 768 || window.matchMedia("(pointer: coarse)").matches);

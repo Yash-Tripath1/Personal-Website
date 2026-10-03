@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
 import { LINKS, PROJECTS } from "../data/projects";
 import { emit } from "../lib/bus";
-import { HOME, scrollToStop } from "../lib/state";
+import { CONTACT, HOME, scrollToStop } from "../lib/state";
 
 type Line = { kind: "in" | "out"; text: string; href?: string };
 
 const out = (...t: string[]): Line[] => t.map((text) => ({ kind: "out", text }));
 
-const SUGGESTIONS = ["help", "projects", "contact", "music", "fly home"];
+const SUGGESTIONS = ["help", "projects", "astro", "contact", "music", "fly home"];
 
 export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
   const [lines, setLines] = useState<Line[]>(() => out("Welcome. Type help to see what you can ask."));
@@ -29,7 +29,7 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
         return out(
           "about · whoami · projects · skills · interests · education",
           "contact · email · github · linkedin · glymph",
-          "fly <planet> · music [name] · dino · meteor · clear",
+          "fly <planet> · music [name] · astro · dino · meteor · clear",
         );
       case "about":
         return out(
@@ -57,7 +57,7 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
           "other:  Linux (Ubuntu) · n8n · Vercel",
         );
       case "interests":
-        return out("🛡 cybersecurity   🦖 dinosaurs   🎵 music   🧠 AI and ML   🛠 building products");
+        return out("🛡 cybersecurity   🦖 dinosaurs   🎵 music    AI and ML   🛠 building products");
       case "education":
         return out(
           "IIT Madras · BS Data Science and Applications (online, ongoing)",
@@ -91,6 +91,10 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
           scrollToStop(HOME);
           return out("Flying to the home planet 🌍");
         }
+        if (["contact", "end", "astronaut", "astro"].includes(arg)) {
+          scrollToStop(CONTACT);
+          return out("Flying to the astronaut 🧑‍🚀");
+        }
         if (["top", "start", "hello"].includes(arg)) {
           scrollToStop(0);
           return out("Heading back to the start ↑");
@@ -103,6 +107,13 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
       }
       case "music":
         return out(...onMusic(arg).split("\n"));
+      case "astro":
+      case "astronaut":
+      case "wave":
+      case "hi":
+      case "hello":
+        emit("astro-wave");
+        return out("📡 Incoming transmission: the astronaut waves back. Hello, human!");
       case "dino":
         return out("RAWR. The little dino lives on the home planet, go say hi.");
       case "meteor":

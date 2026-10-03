@@ -1,8 +1,8 @@
 import { useEffect, useMemo, useRef, type MutableRefObject } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
-import { HOME, CONTACT, state } from "../lib/state";
-import { PLANET_R, cameraDistance, stopPos, visibleHeight } from "../lib/layout";
+import { HOME, state } from "../lib/state";
+import { PLANET_R, stopPos } from "../lib/layout";
 import { on, setCursorLabel, toast, emit } from "../lib/bus";
 import { sfx } from "../lib/audio";
 import { atmoFragment, atmoVertex, planetFragment, planetVertex } from "./shaders";
@@ -246,74 +246,6 @@ export function HomePlanet() {
           <meshBasicMaterial color={k.c} />
         </mesh>
       ))}
-    </group>
-  );
-}
-
-/* A wireframe lock floating at the contact stop. It is sized and dimmed so the terminal text stays readable. */
-export function ContactLock() {
-  const [x, y, z] = stopPos(CONTACT);
-  const root = useRef<THREE.Group>(null!);
-  const knot = useRef<THREE.Mesh>(null!);
-  const core = useRef<THREE.Mesh>(null!);
-  const bits = useRef<THREE.Group>(null!);
-  const bitData = useMemo(
-    () =>
-      Array.from({ length: 26 }, (_, i) => ({
-        a: (i / 26) * Math.PI * 2,
-        r: 3.1 + (i % 3) * 0.35,
-        y: ((i * 37) % 17) / 17 - 0.5,
-        s: 0.05 + ((i * 13) % 7) / 90,
-      })),
-    [],
-  );
-
-  useFrame((s, dt) => {
-    const d = Math.abs(state.current - CONTACT);
-    root.current.visible = d < 2.3;
-    if (d >= 2.3) return;
-    const t = s.clock.elapsedTime;
-
-    // shrink to the free space left of the terminal card
-    const w = s.size.width;
-    const h = s.size.height;
-    const aspect = w / h;
-    let fit = 0.75;
-    if (aspect >= 1) {
-      const ppu = h / visibleHeight(cameraDistance(CONTACT, aspect));
-      const centre = w * (0.5 - 0.33);
-      const cardLeft = w * 0.95 - Math.min(640, w * 0.9);
-      const free = Math.max(0, cardLeft - 24 - centre);
-      fit = clamp(free / (3.6 * ppu), 0.4, 0.85);
-    }
-    root.current.scale.setScalar(Math.max(appearFor(d), 0.0001) * fit);
-
-    knot.current.rotation.x += dt * 0.25;
-    knot.current.rotation.y += dt * 0.35;
-    core.current.rotation.y -= dt * 0.6;
-    core.current.scale.setScalar(1 + Math.sin(t * 2) * 0.06);
-    bits.current.rotation.y = t * 0.2;
-    root.current.position.y = y + Math.sin(t * 0.6) * 0.15;
-  });
-
-  return (
-    <group ref={root} position={[x, y, z]}>
-      <mesh ref={knot}>
-        <torusKnotGeometry args={[1.45, 0.34, 160, 18, 2, 3]} />
-        <meshBasicMaterial color="#b6f0d2" wireframe transparent opacity={0.32} />
-      </mesh>
-      <mesh ref={core}>
-        <icosahedronGeometry args={[0.7, 1]} />
-        <meshBasicMaterial color={new THREE.Color("#ffc2d9").multiplyScalar(1.1)} wireframe transparent opacity={0.6} />
-      </mesh>
-      <group ref={bits}>
-        {bitData.map((b, i) => (
-          <mesh key={i} position={[Math.cos(b.a) * b.r, b.y * 2.6, Math.sin(b.a) * b.r]}>
-            <boxGeometry args={[b.s * 2, b.s * 2, b.s * 2]} />
-            <meshBasicMaterial color={i % 2 ? "#cdb8ff" : "#b5dcff"} transparent opacity={0.6} />
-          </mesh>
-        ))}
-      </group>
     </group>
   );
 }
