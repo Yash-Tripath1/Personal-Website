@@ -14,7 +14,7 @@ export default function Scene({ mobile }: { mobile: boolean }) {
   return (
     <Canvas
       flat
-      dpr={mobile ? [1, 1.5] : [1, 2]}
+      dpr={mobile ? [1, 1.5] : [1, 1.75]}
       camera={{ fov: FOV, near: 0.1, far: 700, position: [0, 0, 52] }}
       gl={{ antialias: false, powerPreference: "high-performance" }}
       style={{ touchAction: "pan-y" }}

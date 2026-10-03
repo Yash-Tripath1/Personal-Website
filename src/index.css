@@ -152,6 +152,18 @@ html {
   pointer-events: auto;
 }
 
+/* phones: shorter blur radius keeps the glass look but is far cheaper to composite */
+@media (pointer: coarse) {
+  .glass {
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+  }
+  .glass-solid {
+    backdrop-filter: blur(14px) saturate(1.15);
+    -webkit-backdrop-filter: blur(14px) saturate(1.15);
+  }
+}
+
 @keyframes blink {
   0%,
   49% {
