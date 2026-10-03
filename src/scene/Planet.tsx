@@ -91,8 +91,9 @@ export function Planet({ index, project }: { index: number; project: Project }) 
     root.current.visible = d < 2.3;
     if (d >= 2.3) return;
     const t = s.clock.elapsedTime;
-    // planets grow into view as the camera approaches, so nothing pops in
-    const k = clamp((2.3 - d) / 0.9, 0, 1);
+    // planets grow into view as the camera approaches, so nothing pops in;
+    // neighbours stay small so the current planet owns the frame
+    const k = clamp((1.45 - d) / 1.0, 0, 1);
     const appear = k * k * (3 - 2 * k);
     hover.current += ((hovering.current ? 1 : 0) - hover.current) * Math.min(1, dt * 6);
     pulse.current = Math.max(0, pulse.current - dt * 0.8);
@@ -121,7 +122,9 @@ export function Planet({ index, project }: { index: number; project: Project }) 
       u.uForm.value = a.form;
       pulse.current = Math.max(pulse.current, 0.7);
     }
-    atmo.uIntensity.value = 0.7 + hover.current * 0.5 + pulse.current * 0.6;
+    // neighbours stay dim so the current planet owns the frame
+    const fade = 0.25 + 0.75 * clamp(1.15 - d, 0, 1);
+    atmo.uIntensity.value = (0.7 + hover.current * 0.5 + pulse.current * 0.6) * fade;
   });
 
   const active = () => Math.abs(state.current - index) < 0.6;

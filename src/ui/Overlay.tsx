@@ -32,6 +32,26 @@ function Stop({
   );
 }
 
+/* A soft dark pocket behind the hero name so the particles read crisp
+   against the scene instead of merging with planets behind them. */
+function HeroPocket() {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let raf = 0;
+    const loop = () => {
+      raf = requestAnimationFrame(loop);
+      const el = ref.current;
+      if (!el) return;
+      const o = 1 - smooth(0.2, 0.8, Math.abs(state.current));
+      el.style.opacity = o.toFixed(3);
+      el.style.visibility = o <= 0.01 ? "hidden" : "visible";
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, []);
+  return <div ref={ref} className="hero-pocket" aria-hidden />;
+}
+
 function Chip({ children, color }: { children: ReactNode; color: string }) {
   return (
     <span
@@ -259,6 +279,7 @@ export function Overlay({ onMusic }: { onMusic: (arg: string) => string }) {
 
   return (
     <>
+      <HeroPocket />
       <Stop index={0} register={register} hero>
         <div className="card pointer-events-none text-center">
           <p className="font-display text-lg italic text-cream/85 md:text-2xl">Developer from Lucknow</p>

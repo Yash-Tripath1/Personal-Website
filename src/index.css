@@ -164,6 +164,45 @@ html {
   }
 }
 
+/* phones: no rubber-band purple stretch or pull-to-refresh fighting the scroll */
+html,
+body {
+  overscroll-behavior-y: none;
+}
+
+/* soft dark pocket behind the hero name: lifts the particles off the scene */
+.hero-pocket {
+  position: fixed;
+  inset: 0;
+  z-index: 10;
+  pointer-events: none;
+  background: radial-gradient(52% 40% at 50% 42%, rgba(14, 10, 32, 0.6), rgba(14, 10, 32, 0.26) 55%, transparent 76%);
+}
+
+/* preloader emblem */
+@keyframes orbitSpin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes orbitSpinRev {
+  to {
+    transform: rotate(-360deg);
+  }
+}
+@keyframes riseIn {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
 @keyframes blink {
   0%,
   49% {

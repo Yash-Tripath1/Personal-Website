@@ -15,7 +15,7 @@ export function sideOf(i: number) {
 }
 
 export function cameraDistance(i: number, aspect: number) {
-  const base = i === HERO ? 12 : 9;
+  const base = i === HERO ? 13.5 : 10.8;
   const portrait = aspect < 1 ? (1 - aspect) * (i === HERO ? 10 : 16) : 0;
   return base + portrait;
 }
