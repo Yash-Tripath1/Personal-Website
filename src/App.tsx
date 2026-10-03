@@ -2,10 +2,12 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import Scene from "./scene/Scene";
 import { Overlay } from "./ui/Overlay";
 import { Hud } from "./ui/Hud";
+import { NavArrows } from "./ui/NavArrows";
 import { Preloader } from "./ui/Preloader";
 import { Cursor } from "./ui/Cursor";
 import { Flash, Toasts } from "./ui/Effects";
 import { STOP_COUNT, STOP_VH, cancelFlight, isMobileViewport, state } from "./lib/state";
+import { initSmoothWheel } from "./lib/smoothWheel";
 import { emit, toast } from "./lib/bus";
 import { TRACKS, getTrack, isMuted, setTrack, sfx, startMusic, stopMusic, type TrackId } from "./lib/audio";
 
@@ -48,6 +50,9 @@ export default function App() {
       window.removeEventListener("keydown", onKey);
     };
   }, []);
+
+  // buttery wheel scrolling on laptops; touch devices keep native momentum
+  useEffect(() => initSmoothWheel(), []);
 
   // which stop are we at (for the HUD and the arrival chime)
   useEffect(() => {
@@ -165,6 +170,7 @@ export default function App() {
         onToggleSound={toggleSound}
         onSelectTrack={selectTrack}
       />
+      <NavArrows visible={entered && mobile} />
       <Toasts />
       <Flash />
       <Cursor />
