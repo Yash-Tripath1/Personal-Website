@@ -60,8 +60,8 @@ export function Terminal({ onMusic }: { onMusic: (arg: string) => string }) {
         return out("🛡 cybersecurity   🦖 dinosaurs   🎵 music    AI and ML   🛠 building products");
       case "education":
         return out(
-          "IIT Madras · BS Data Science and Applications (online, ongoing)",
-          "University of Lucknow · BCA (from Aug 2026)",
+          "IIT Madras · BS Data Science and Applications)",
+          "University of Lucknow · BCA",
         );
       case "contact":
         return [

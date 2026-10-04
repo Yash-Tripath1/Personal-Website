@@ -169,7 +169,7 @@ function AboutCard() {
 
       <div className="mt-6 grid gap-3 md:grid-cols-2">
         {[
-          ["IIT Madras", "BS Data Science and Applications, online, ongoing"],
+          ["IIT Madras", "BS Data Science and Applications, ongoing"],
           ["University of Lucknow", "BCA, from Aug 2026"],
           ["Glymph Studio", "Cofounder, from 2026"],
           ["City Montessori School", "Mahanagar, Lucknow"],
