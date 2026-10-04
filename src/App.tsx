@@ -97,9 +97,34 @@ export default function App() {
     if (sound) {
       startMusic();
       setSoundOn(true);
+    } else {
+      stopMusic();
+      setSoundOn(false);
     }
     window.setTimeout(() => document.body.classList.remove("locked"), 1200);
     window.setTimeout(() => setShowPre(false), 1400);
+  }, []);
+
+  // the logo restarts the whole experience — loader and all — no browser reload needed
+  const restart = useCallback(() => {
+    state.entered = false;
+    state.flight = null;
+    state.target = 0;
+    state.current = 0;
+    window.scrollTo(0, 0);
+    document.body.classList.add("locked");
+    setEntered(false);
+    setLeaving(false);
+    setShowPre(true);
+  }, []);
+
+  // back/forward cache restores would skip the loader: force a true reload then
+  useEffect(() => {
+    const onShow = (e: PageTransitionEvent) => {
+      if (e.persisted) window.location.reload();
+    };
+    window.addEventListener("pageshow", onShow);
+    return () => window.removeEventListener("pageshow", onShow);
   }, []);
 
   const trackName = (id: TrackId) => TRACKS.find((t) => t.id === id)?.name ?? id;
@@ -169,6 +194,7 @@ export default function App() {
         track={track}
         onToggleSound={toggleSound}
         onSelectTrack={selectTrack}
+        onLogo={restart}
       />
       <NavArrows visible={entered && mobile} />
       <Toasts />

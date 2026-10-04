@@ -113,6 +113,7 @@ export function Hud({
   track,
   onToggleSound,
   onSelectTrack,
+  onLogo,
 }: {
   visible: boolean;
   active: number;
@@ -120,6 +121,7 @@ export function Hud({
   track: TrackId;
   onToggleSound: () => void;
   onSelectTrack: (id: TrackId) => void;
+  onLogo: () => void;
 }) {
   const projNo =
     active >= 1 && active <= PROJECTS.length
@@ -130,13 +132,24 @@ export function Hud({
       className="pointer-events-none fixed inset-0 z-30 transition-opacity duration-1000"
       style={{ opacity: visible ? 1 : 0, transitionDelay: visible ? "1.2s" : "0s" }}
     >
-      {/* top left logo */}
+      {/* top left logo: a tiny planet with a tilted ring — the site's little mascot */}
       <button
-        onClick={() => scrollToStop(0)}
+        onClick={onLogo}
         className="pointer-events-auto absolute left-5 top-5 flex items-center gap-2.5 md:left-9 md:top-7"
-        aria-label="Back to top"
+        aria-label="Back to the start"
       >
-        <span className="grid h-9 w-9 place-items-center rounded-full bg-cream font-display text-sm font-extrabold text-ink">AT</span>
+        <span className="relative grid h-9 w-9 place-items-center" aria-hidden>
+          <svg viewBox="0 0 36 36" className="absolute inset-0 h-full w-full">
+            <ellipse cx="18" cy="18" rx="16" ry="6.5" fill="none" stroke="rgba(255,194,217,0.5)" strokeWidth="1" transform="rotate(-16 18 18)" />
+          </svg>
+          <span
+            className="h-[18px] w-[18px] rounded-full"
+            style={{
+              background: "linear-gradient(135deg, #cdb8ff 0%, #ffc2d9 55%, #b5dcff 100%)",
+              boxShadow: "0 0 14px 2px rgba(205,184,255,0.45), inset -2px -3px 5px rgba(28,22,54,0.5)",
+            }}
+          />
+        </span>
         <span className="hidden font-display text-lg font-bold italic leading-none sm:block">Anadi</span>
       </button>
 
