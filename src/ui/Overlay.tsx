@@ -282,7 +282,7 @@ export function Overlay({ onMusic }: { onMusic: (arg: string) => string }) {
       <HeroPocket />
       <Stop index={0} register={register} hero>
         <div className="card pointer-events-none text-center">
-          <p className="font-display text-lg italic text-cream/85 md:text-2xl">Developer from Lucknow</p>
+          <p className="font-display text-lg italic text-cream/85 md:text-2xl">Full-stack developer & indie maker.</p>
           <p
             className="mt-4 font-mono text-[11px] uppercase tracking-[0.3em] text-cream/55"
             style={{ animation: "bob 2.4s ease-in-out infinite" }}
